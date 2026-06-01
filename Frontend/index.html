@@ -61,13 +61,18 @@
             padding: 0 20px;
         }
 
-        /* BARRA DE NAVEGACIÓN */
+        /* BARRA DE NAVEGACIÓN FIJA */
         navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 20px 0;
             border-bottom: 1px solid var(--borde-tarjetas);
+            /* Propiedades para fijar la barra */
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-principal);
+            z-index: 1000;
         }
 
         .logo {
@@ -77,6 +82,33 @@
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-nav-mapa {
+            background: linear-gradient(135deg, var(--color-primario), #7c3aed);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav-mapa:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(14, 165, 233, 0.4);
+            color: white;
         }
 
         .btn-tema {
@@ -241,6 +273,20 @@
             .grid-2 { grid-template-columns: 1fr; }
             .hero h1 { font-size: 38px; }
             .hero p { font-size: 16px; }
+
+            /* Ajustes para la barra de navegación en móviles */
+            navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 0;
+            }
+            .nav-actions {
+                width: 100%;
+                justify-content: center;
+            }
+            #textoTema {
+                display: none; /* Oculta el texto para que quepan los dos botones */
+            }
         }
     </style>
 </head>
@@ -249,9 +295,14 @@
     <div class="contenedor">
         <navbar>
             <div class="logo">🗺️ SafeRouteMedellín</div>
-            <button class="btn-tema" id="toggleTema">
-                <i class="fa-solid fa-moon" id="iconoTema"></i> <span id="textoTema">Modo Oscuro</span>
-            </button>
+            <div class="nav-actions">
+                <a href="mapa.html" class="btn-nav-mapa">
+                    🚀 Ir al Mapa
+                </a>
+                <button class="btn-tema" id="toggleTema">
+                    <i class="fa-solid fa-moon" id="iconoTema"></i> <span id="textoTema">Modo Oscuro</span>
+                </button>
+            </div>
         </navbar>
 
         <section class="hero">
