@@ -42,8 +42,9 @@ const slider = document.getElementById('balance-slider');
 const alphaLabel = document.getElementById('alpha-val');
 const betaLabel = document.getElementById('beta-val');
 
+// CORRECCIÓN APLICADA: Se eliminó la validación 'if (mapLocked) return;'
+// Ahora el slider SIEMPRE se puede mover, sin importar si ya hay ruta o no.
 slider.addEventListener('input', (e) => {
-    if (mapLocked) return;
     const beta = parseFloat(e.target.value);
     const alpha = (1 - beta).toFixed(1);
     alphaLabel.innerText = `Alpha: ${alpha}`;
@@ -153,7 +154,7 @@ function updateTechnicalMarker(type, latlng) {
     }
 }
 
-// CORRECCIÓN: Bloquea solo herramientas de captura, dejando libres los disparadores de rutas
+// Bloquea solo herramientas de captura, dejando libres los disparadores de rutas (y el slider)
 function checkAndApplyLock() {
     const originVal = document.getElementById('origin-input').value;
     const destVal = document.getElementById('destination-input').value;
@@ -161,7 +162,7 @@ function checkAndApplyLock() {
     if (originVal && destVal) {
         mapLocked = true;
 
-        // Desactivar estrictamente entradas y selectores para proteger el estado
+        // Desactivar estrictamente entradas y selectores para proteger el estado geográfico
         document.getElementById('origin-input').disabled = true;
         document.getElementById('destination-input').disabled = true;
         document.getElementById('select-barrio-origin').disabled = true;
@@ -262,6 +263,7 @@ async function requestRouteService(isEmergency, emergencyType = '') {
     }
 
     const originCoords = originStr.split(',').map(Number);
+    // Tomar los valores *actuales* del slider
     const betaValue = parseFloat(slider.value);
     const alphaValue = parseFloat((1 - betaValue).toFixed(1));
     const mode = document.getElementById('algo-mode').value;
@@ -370,7 +372,7 @@ function executeDualSimultaneousAnimation(resultPayload) {
     if (resultPayload.greedy) {
         animatingGreedyPath = L.polyline([], {
             color: '#34d399',
-            weight: 1.5,       // <- Aquí le bajamos el grosor para que sea igual a A*
+            weight: 1.5,
             opacity: 0.95,
             zIndexOffset: 1000
         }).addTo(greedyExplorationLayer);

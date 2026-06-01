@@ -1,150 +1,300 @@
 <!DOCTYPE html>
+
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeRoute Medellín - Panel de Control</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="style.css">
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SafeRoute Medellín - Panel de Control</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
 
-    <div class="app-container">
 
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>SafeRoute Med</h2>
-                <button id="theme-toggle" class="btn-icon">🌓 Mode</button>
-            </div>
 
-            <div class="control-group">
-                <h3>Visualización</h3>
-                <label class="switch-container">
-                    <input type="checkbox" id="heatmap-toggle">
-                    <span class="slider-switch"></span>
-                    Mostrar Mapa de Calor (Riesgo Real)
-                </label>
-            </div>
+<div class="app-container">
 
-            <div class="control-group">
-                <h3>Configuración de Ruta</h3>
 
-                <div class="point-selector">
-                    <label>Origen (Lat, Lon):</label>
-                    <input type="text" id="origin-input" placeholder="Haga clic en el mapa o elija opción">
-                    <div class="button-row">
-                        <button id="btn-pick-origin" class="btn-sub">📍 Mapa</button>
-                        <button id="btn-gps-origin" class="btn-sub">🛰️ GPS</button>
-                        <select id="select-barrio-origin" class="select-barrio">
-                            <option value="">-- Barrio --</option>
-                            <option value="6.2083,-75.5675">El Poblado</option>
-                            <option value="6.2442,-75.5912">Laureles</option>
-                            <option value="6.2518,-75.5636">Centro / Candelaria</option>
-                            <option value="6.2914,-75.5586">Aranjuez</option>
-                            <option value="6.2674,-75.5878">Robledo</option>
-                            <option value="6.2312,-75.6104">Belén</option>
-                            <option value="6.3375,-75.5521">Bello</option>
-                            <option value="6.1738,-75.6041">Envigado</option>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="point-selector">
-                    <label>Destino (Lat, Lon):</label>
-                    <input type="text" id="destination-input" placeholder="Haga clic en el mapa o elija opción">
-                    <div class="button-row">
-                        <button id="btn-pick-destination" class="btn-sub">📍 Mapa</button>
-                        <button id="btn-gps-destination" class="btn-sub">🛰️ GPS</button>
-                        <select id="select-barrio-destination" class="select-barrio">
-                            <option value="">-- Barrio --</option>
-                            <option value="6.2083,-75.5675">El Poblado</option>
-                            <option value="6.2442,-75.5912">Laureles</option>
-                            <option value="6.2518,-75.5636">Centro / Candelaria</option>
-                            <option value="6.2914,-75.5586">Aranjuez</option>
-                            <option value="6.2674,-75.5878">Robledo</option>
-                            <option value="6.2312,-75.6104">Belén</option>
-                            <option value="6.3375,-75.5521">Bello</option>
-                            <option value="6.1738,-75.6041">Envigado</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+<aside class="sidebar">
 
-            <div class="control-group">
-                <h3>Algoritmo y Animación</h3>
-                <select id="algo-mode">
-                    <option value="both">Comparar Ambos Algoritmos</option>
-                    <option value="astar">Solo A* (Estrella)</option>
-                    <option value="greedy">Solo Greedy (Voraz)</option>
-                </select>
+<div class="sidebar-header">
 
-                <select id="render-type">
-                    <option value="animation">Ver Animación (Pulpo / Culebra)</option>
-                    <option value="instant">Ruta Definitiva de una vez</option>
-                </select>
-            </div>
+<h2>SafeRoute Med</h2>
 
-            <div class="control-group">
-                <div class="slider-header">
-                    <span>⚡ Rapidez (Alpha)</span>
-                    <span>🛡️ Seguridad (Beta)</span>
-                </div>
-                <input type="range" id="balance-slider" min="0" max="1" step="0.1" value="0.5">
-                <div class="slider-values">
-                    <span id="alpha-val">Alpha: 0.5</span>
-                    <span id="beta-val">Beta: 0.5</span>
-                </div>
-            </div>
+<button id="theme-toggle" class="btn-icon">🌓 Mode</button>
 
-            <button id="btn-calculate" class="btn-primary">⚡ Calcular Ruta Optimizada</button>
-            <button id="btn-clear" class="btn-sub" style="width: 100%; margin-top: 10px; border-color: var(--emergency-color); color: var(--emergency-color);">🗑️ Limpiar Mapa</button>
+</div>
 
-            <button id="btn-toggle-metrics" class="btn-sub" style="width: 100%; margin-top: 5px;">📊 Mostrar / Ocultar Métricas</button>
-            <div class="control-group emergency-section">
-                <h3>🚨 Atención Inmediata</h3>
-                <p class="emergency-desc">Busca el punto de apoyo más seguro usando tus criterios de balance.</p>
-                <div class="button-row">
-                    <button id="btn-emergency-cai" class="btn-emergency">👮 Buscar CAI Cercano</button>
-                    <button id="btn-emergency-hosp" class="btn-emergency">🏥 Buscar Hospital</button>
-                </div>
-            </div>
-        </aside>
 
-        <main id="map" class="map-area"></main>
 
-        <footer class="metrics-panel">
-            <div class="metric-card header-card">
-                <h3>Métricas de Rendimiento</h3>
-                <p>Resultados del Grafo Vial</p>
-            </div>
+<div class="control-group">
 
-            <div class="metric-card algo-ast" id="metrics-astar">
-                <h4>Algoritmo A* (Pulpo)</h4>
-                <div class="grid-metrics">
-                    <div>Nodos Explorados: <strong id="ast-explored">-</strong></div>
-                    <div>Tiempo Ejecución: <strong id="ast-time">-</strong></div>
-                    <div>Nodos en Ruta: <strong id="ast-nodes">-</strong></div>
-                    <div>Costo Algorítmico: <strong id="ast-cost">-</strong></div>
-                    <div>Distancia Real: <strong id="ast-dist">-</strong></div>
-                </div>
-            </div>
+<h3>Visualización</h3>
 
-            <div class="metric-card algo-gre" id="metrics-greedy">
-                <h4>Algoritmo Greedy (Culebra)</h4>
-                <div class="grid-metrics">
-                    <div>Nodos Explorados: <strong id="gre-explored">-</strong></div>
-                    <div>Tiempo Ejecución: <strong id="gre-time">-</strong></div>
-                    <div>Nodos en Ruta: <strong id="gre-nodes">-</strong></div>
-                    <div>Costo Algorítmico: <strong id="gre-cost">-</strong></div>
-                    <div>Distancia Real: <strong id="gre-dist">-</strong></div>
-                </div>
-            </div>
-        </footer>
+<label class="switch-container">
 
-    </div>
+<input type="checkbox" id="heatmap-toggle">
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-    <script src="main.js"></script>
+<span class="slider-switch"></span>
+
+Mostrar Mapa de Calor (Riesgo Real)
+
+</label>
+
+</div>
+
+
+
+<div class="control-group">
+
+<h3>Configuración de Ruta</h3>
+
+
+
+<div class="point-selector">
+
+<label>Origen (Lat, Lon):</label>
+
+<input type="text" id="origin-input" placeholder="Haga clic en el mapa o elija opción">
+
+<div class="button-row">
+
+<button id="btn-pick-origin" class="btn-sub">📍 Mapa</button>
+
+<button id="btn-gps-origin" class="btn-sub">🛰️ GPS</button>
+
+<select id="select-barrio-origin" class="select-barrio">
+
+<option value="">-- Barrio --</option>
+
+<option value="6.2083,-75.5675">El Poblado</option>
+
+<option value="6.2442,-75.5912">Laureles</option>
+
+<option value="6.2518,-75.5636">Centro / Candelaria</option>
+
+<option value="6.2914,-75.5586">Aranjuez</option>
+
+<option value="6.2674,-75.5878">Robledo</option>
+
+<option value="6.2312,-75.6104">Belén</option>
+
+<option value="6.3375,-75.5521">Bello</option>
+
+<option value="6.1738,-75.6041">Envigado</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+
+<div class="point-selector">
+
+<label>Destino (Lat, Lon):</label>
+
+<input type="text" id="destination-input" placeholder="Haga clic en el mapa o elija opción">
+
+<div class="button-row">
+
+<button id="btn-pick-destination" class="btn-sub">📍 Mapa</button>
+
+<button id="btn-gps-destination" class="btn-sub">🛰️ GPS</button>
+
+<select id="select-barrio-destination" class="select-barrio">
+
+<option value="">-- Barrio --</option>
+
+<option value="6.2083,-75.5675">El Poblado</option>
+
+<option value="6.2442,-75.5912">Laureles</option>
+
+<option value="6.2518,-75.5636">Centro / Candelaria</option>
+
+<option value="6.2914,-75.5586">Aranjuez</option>
+
+<option value="6.2674,-75.5878">Robledo</option>
+
+<option value="6.2312,-75.6104">Belén</option>
+
+<option value="6.3375,-75.5521">Bello</option>
+
+<option value="6.1738,-75.6041">Envigado</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="control-group">
+
+<h3>Algoritmo y Animación</h3>
+
+<select id="algo-mode">
+
+<option value="both">Comparar Ambos Algoritmos</option>
+
+<option value="astar">Solo A* (Estrella)</option>
+
+<option value="greedy">Solo Greedy (Voraz)</option>
+
+</select>
+
+
+
+<select id="render-type">
+
+<option value="animation">Ver Animación (Pulpo / Culebra)</option>
+
+<option value="instant">Ruta Definitiva de una vez</option>
+
+</select>
+
+</div>
+
+
+
+<div class="control-group">
+
+<div class="slider-header">
+
+<span>⚡ Rapidez (Alpha)</span>
+
+<span>🛡️ Seguridad (Beta)</span>
+
+</div>
+
+<input type="range" id="balance-slider" min="0" max="1" step="0.1" value="0.5">
+
+<div class="slider-values">
+
+<span id="alpha-val">Alpha: 0.5</span>
+
+<span id="beta-val">Beta: 0.5</span>
+
+</div>
+
+</div>
+
+
+
+<button id="btn-calculate" class="btn-primary">⚡ Calcular Ruta Optimizada</button>
+
+<button id="btn-clear" class="btn-sub" style="width: 100%; margin-top: 10px; border-color: var(--emergency-color); color: var(--emergency-color);">🗑️ Limpiar Mapa</button>
+
+
+
+<button id="btn-toggle-metrics" class="btn-sub" style="width: 100%; margin-top: 5px;">📊 Mostrar / Ocultar Métricas</button>
+
+<div class="control-group emergency-section">
+
+<h3>🚨 Atención Inmediata</h3>
+
+<p class="emergency-desc">Busca el punto de apoyo más seguro usando tus criterios de balance.</p>
+
+<div class="button-row">
+
+<button id="btn-emergency-cai" class="btn-emergency">👮 Buscar CAI Cercano</button>
+
+<button id="btn-emergency-hosp" class="btn-emergency">🏥 Buscar Hospital</button>
+
+</div>
+
+</div>
+
+</aside>
+
+
+
+<main id="map" class="map-area"></main>
+
+
+
+<footer class="metrics-panel">
+
+<div class="metric-card header-card">
+
+<h3>Métricas de Rendimiento</h3>
+
+<p>Resultados del Grafo Vial</p>
+
+</div>
+
+
+
+<div class="metric-card algo-ast" id="metrics-astar">
+
+<h4>Algoritmo A* (Pulpo)</h4>
+
+<div class="grid-metrics">
+
+<div>Nodos Explorados: <strong id="ast-explored">-</strong></div>
+
+<div>Tiempo Ejecución: <strong id="ast-time">-</strong></div>
+
+<div>Nodos en Ruta: <strong id="ast-nodes">-</strong></div>
+
+<div>Costo Algorítmico: <strong id="ast-cost">-</strong></div>
+
+<div>Distancia Real: <strong id="ast-dist">-</strong></div>
+
+</div>
+
+</div>
+
+
+
+<div class="metric-card algo-gre" id="metrics-greedy">
+
+<h4>Algoritmo Greedy (Culebra)</h4>
+
+<div class="grid-metrics">
+
+<div>Nodos Explorados: <strong id="gre-explored">-</strong></div>
+
+<div>Tiempo Ejecución: <strong id="gre-time">-</strong></div>
+
+<div>Nodos en Ruta: <strong id="gre-nodes">-</strong></div>
+
+<div>Costo Algorítmico: <strong id="gre-cost">-</strong></div>
+
+<div>Distancia Real: <strong id="gre-dist">-</strong></div>
+
+</div>
+
+</div>
+
+</footer>
+
+
+
+</div>
+
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+<script src="main.js"></script>
+
 </body>
+
 </html>
+
