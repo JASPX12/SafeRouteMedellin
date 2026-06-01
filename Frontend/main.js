@@ -406,17 +406,23 @@ function executeDualSimultaneousAnimation(resultPayload) {
             animatingGreedyPath.bringToFront();
         }
 
-        // CONDICIÓN DE PARADA: Ambos terminan exactamente en el mismo frame
+       // CONDICIÓN DE PARADA: Ambos terminan exactamente en el mismo frame
         if (currentFrame >= totalFrames) {
             clearInterval(animationClock);
             animationClock = null;
 
-            // Dibujar las soluciones óptimas en trazado grueso final
+            // ==========================================
+            // ¡MAGIA AQUÍ! Borramos el rastro de exploración
+            // ==========================================
+            map.removeLayer(aStarExplorationLayer);
+            map.removeLayer(greedyExplorationLayer);
+
+            // Dibujar las soluciones óptimas en trazado grueso final y limpio
             if (resultPayload.a_star) drawStaticPolyline(resultPayload.a_star.route, '#9333ea');
             if (resultPayload.greedy) drawStaticPolyline(resultPayload.greedy.route, '#059669');
 
             updateMetricsDashboard(resultPayload);
-            console.log("[SafeRoute] Animación finalizada en empate técnico.");
+            console.log("[SafeRoute] Animación finalizada en empate técnico. Mapa limpio.");
         }
     }, frameIntervalTime);
 }

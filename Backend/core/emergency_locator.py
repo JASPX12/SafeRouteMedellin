@@ -17,7 +17,7 @@ class EmergencyLocator:
     def _load_data(self):
         # Rutas relativas hacia la carpeta Data
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        data_dir = os.path.join(base_dir, "..", "..", "Data")
+        data_dir = os.path.join(base_dir, "..", "Data")
 
         # ==========================================
         # 1. CARGAR CAIs Y ESTACIONES DE POLICÍA
