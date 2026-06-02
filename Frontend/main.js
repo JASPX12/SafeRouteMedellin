@@ -445,8 +445,9 @@ async function requestRouteService(isEmergency, emergencyType = '') {
 
         // Despachar modo de renderizado
         if (renderType === 'instant') {
+            // Morado = Greedy (exploración amplia) | Verde = A* (ruta heurística f+g)
             if (dataResult.greedy) drawStaticPolyline(dataResult.greedy.route, '#9333ea');
-            if (dataResult.a_star) drawStaticPolyline(dataResult.a_star.route, '#059669');
+            if (dataResult.a_star) drawStaticPolyline(dataResult.a_star.route, '#34d399');
             updateMetricsDashboard(dataResult);
         } else {
             executeDualSimultaneousAnimation(dataResult);
@@ -482,7 +483,6 @@ function calculateTrueGeodeticDistance(coordinatesList) {
 
 // --- 8. DINÁMICA DE ANIMACIONES SIMULTÁNEAS (SINCRONIZACIÓN PERFECTA) ---
 function executeDualSimultaneousAnimation(resultPayload) {
-    // Morado = Greedy | Verde = A*
     const greedyHistory = resultPayload.greedy ? resultPayload.greedy.history_visited : [];
     const aStarHistory = resultPayload.a_star ? resultPayload.a_star.history_visited : [];
 
@@ -508,7 +508,7 @@ function executeDualSimultaneousAnimation(resultPayload) {
     animationClock = setInterval(() => {
         currentFrame++;
 
-        // Greedy (morado): dibuja segmentos de exploración
+        // Greedy (morado): exploración amplia por segmentos
         if (resultPayload.greedy) {
             let startIdx = Math.floor(((currentFrame - 1) / totalFrames) * greedyHistory.length);
             let endIdx = Math.floor((currentFrame / totalFrames) * greedyHistory.length);
@@ -519,8 +519,8 @@ function executeDualSimultaneousAnimation(resultPayload) {
             }
         }
 
-        // A* (verde): dibuja la porción correspondiente a este frame
-        if (resultPayload.a_star) {
+        // A* (verde): trazo dirigido por heurística
+        if (resultPayload.a_star && animatingAStarPath) {
             let startIdx = Math.floor(((currentFrame - 1) / totalFrames) * aStarHistory.length);
             let endIdx = Math.floor((currentFrame / totalFrames) * aStarHistory.length);
 
@@ -548,7 +548,7 @@ function executeDualSimultaneousAnimation(resultPayload) {
 
             // Dibujar las soluciones óptimas en trazado grueso final y limpio
             if (resultPayload.greedy) drawStaticPolyline(resultPayload.greedy.route, '#9333ea');
-            if (resultPayload.a_star) drawStaticPolyline(resultPayload.a_star.route, '#059669');
+            if (resultPayload.a_star) drawStaticPolyline(resultPayload.a_star.route, '#34d399');
 
             updateMetricsDashboard(resultPayload);
             console.log("[SafeRoute] Animación finalizada en empate técnico. Mapa limpio.");
@@ -558,6 +558,7 @@ function executeDualSimultaneousAnimation(resultPayload) {
 
 // --- 9. ACTUALIZACIÓN DEL DASHBOARD DE MÉTRICAS ---
 function updateMetricsDashboard(result) {
+    // Tarjeta morada (metrics-astar) = Greedy | Tarjeta verde (metrics-greedy) = A*
     if (result.greedy) {
         document.getElementById('ast-explored').innerText = result.greedy.explored_nodes;
         document.getElementById('ast-time').innerText = `${(result.greedy.execution_time * 1000).toFixed(2)} ms`;

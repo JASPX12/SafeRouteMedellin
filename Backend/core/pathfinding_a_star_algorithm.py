@@ -47,6 +47,9 @@ def algorithm_a_star(graph, origin, destination, alpha, beta):
             return route, total_cost, explored_nodes, history_visited
 
         for neighbor in graph.neighbors(current_node):
+            if neighbor in closed_set:
+                continue
+
             edge_data = graph.get_edge_data(current_node, neighbor)
 
             normalized_length = edge_data['normalized_length']

@@ -60,6 +60,24 @@ app.add_middleware(
 )
 
 
+@app.get("/")
+def root() -> Dict[str, Any]:
+    """Raíz de la API: el mapa no vive aquí, solo los endpoints /api/*."""
+    return {
+        "app": "SafeRoute Medellín API",
+        "status": "ok",
+        "docs": "/docs",
+        "mensaje": "Abre el frontend: Frontend/mapa.html (Live Server o http://127.0.0.1:5500/mapa.html)",
+        "endpoints": [
+            "/api/calculate-routes",
+            "/api/emergency-route",
+            "/api/heatmap",
+            "/api/nearest-node",
+            "/api/send-panic-alert",
+        ],
+    }
+
+
 def find_nearest_node(lat: float, lon: float) -> Any:
     target = (lon, lat)
     _, index = DATA_TREE.query(target)
@@ -139,6 +157,8 @@ def calculate_routes(request: RouteRequest) -> Dict[str, Any]:
         "greedy": None
     }
 
+    errors = []
+
     if mode in ["astar", "both"]:
         start_time_ast = time.time()
         a_star_path, a_star_cost, a_star_explored, a_star_history = algorithm_a_star(
@@ -146,16 +166,16 @@ def calculate_routes(request: RouteRequest) -> Dict[str, Any]:
         )
         ast_time = time.time() - start_time_ast
 
-        if not a_star_path:
-            raise HTTPException(status_code=404, detail="No se encontró un camino viable con A*.")
-
-        response_data["a_star"] = {
-            "route": [[n[1], n[0]] for n in a_star_path],
-            "history_visited": [[[padre[1], padre[0]], [hijo[1], hijo[0]]] for padre, hijo in a_star_history],
-            "cost": a_star_cost,
-            "explored_nodes": a_star_explored,
-            "execution_time": ast_time
-        }
+        if a_star_path:
+            response_data["a_star"] = {
+                "route": [[n[1], n[0]] for n in a_star_path],
+                "history_visited": [[[padre[1], padre[0]], [hijo[1], hijo[0]]] for padre, hijo in a_star_history],
+                "cost": a_star_cost,
+                "explored_nodes": a_star_explored,
+                "execution_time": ast_time
+            }
+        else:
+            errors.append("A* no encontró ruta viable.")
 
     if mode in ["greedy", "both"]:
         start_time_gre = time.time()
@@ -164,16 +184,23 @@ def calculate_routes(request: RouteRequest) -> Dict[str, Any]:
         )
         gre_time = time.time() - start_time_gre
 
-        if not greedy_path:
-            raise HTTPException(status_code=404, detail="No se encontró un camino viable con Greedy.")
+        if greedy_path:
+            response_data["greedy"] = {
+                "route": [[n[1], n[0]] for n in greedy_path],
+                "history_visited": [[[padre[1], padre[0]], [hijo[1], hijo[0]]] for padre, hijo in greedy_history],
+                "cost": greedy_cost,
+                "explored_nodes": len(greedy_history),
+                "execution_time": gre_time
+            }
+        else:
+            errors.append("Greedy no encontró ruta viable.")
 
-        response_data["greedy"] = {
-            "route": [[n[1], n[0]] for n in greedy_path],
-            "history_visited": [[[padre[1], padre[0]], [hijo[1], hijo[0]]] for padre, hijo in greedy_history],
-            "cost": greedy_cost,
-            "explored_nodes": len(greedy_history),
-            "execution_time": gre_time
-        }
+    if not response_data["a_star"] and not response_data["greedy"]:
+        detail = " ".join(errors) if errors else "No se encontró ninguna ruta viable."
+        raise HTTPException(status_code=404, detail=detail)
+
+    if errors and mode != "both":
+        raise HTTPException(status_code=404, detail=errors[0])
 
     return response_data
 
@@ -222,4 +249,4 @@ def send_panic_alert(request: PanicAlertRequest) -> Dict[str, Any]:
         user_message=request.mensaje_personalizado
     )
     
-    return result
+    return result
