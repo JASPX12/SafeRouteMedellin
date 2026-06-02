@@ -32,10 +32,10 @@ ehthumbs.db
 
 # --- Seguridad y Variables de Entorno ---
 .env
-.env.example
 .env.local
 .env.*.local
 secrets.json
+# .env.example SÍ se versiona (solo placeholders, sin secretos)
 
 # --- Archivos Grandes / Logs (Opcional) ---
 *.log
