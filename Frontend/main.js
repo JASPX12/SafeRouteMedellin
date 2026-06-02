@@ -445,9 +445,8 @@ async function requestRouteService(isEmergency, emergencyType = '') {
 
         // Despachar modo de renderizado
         if (renderType === 'instant') {
-            // Morado = Greedy (exploración amplia) | Verde = A* (ruta heurística f+g)
-            if (dataResult.greedy) drawStaticPolyline(dataResult.greedy.route, '#9333ea');
-            if (dataResult.a_star) drawStaticPolyline(dataResult.a_star.route, '#34d399');
+            if (dataResult.a_star) drawStaticPolyline(dataResult.a_star.route, '#9333ea');
+            if (dataResult.greedy) drawStaticPolyline(dataResult.greedy.route, '#34d399');
             updateMetricsDashboard(dataResult);
         } else {
             executeDualSimultaneousAnimation(dataResult);
@@ -483,98 +482,91 @@ function calculateTrueGeodeticDistance(coordinatesList) {
 
 // --- 8. DINÁMICA DE ANIMACIONES SIMULTÁNEAS (SINCRONIZACIÓN PERFECTA) ---
 function executeDualSimultaneousAnimation(resultPayload) {
-    const greedyHistory = resultPayload.greedy ? resultPayload.greedy.history_visited : [];
     const aStarHistory = resultPayload.a_star ? resultPayload.a_star.history_visited : [];
+    const greedyHistory = resultPayload.greedy ? resultPayload.greedy.history_visited : [];
 
-    // CONFIGURACIÓN DE SINCRONIZACIÓN
-    const totalFrames = 60; // Cantidad de pasos totales de la animación
+    const totalFrames = 60;
     let currentFrame = 0;
-    const frameIntervalTime = getAnimFrameInterval(); // Leer velocidad del slider
+    const frameIntervalTime = getAnimFrameInterval();
 
     const aStarExplorationLayer = L.featureGroup().addTo(map);
     const greedyExplorationLayer = L.featureGroup().addTo(map);
     pathLayers.push(aStarExplorationLayer, greedyExplorationLayer);
 
-    let animatingAStarPath = null;
-    if (resultPayload.a_star) {
-        animatingAStarPath = L.polyline([], {
+    let animatingGreedyPath = null;
+    if (resultPayload.greedy) {
+        animatingGreedyPath = L.polyline([], {
             color: '#34d399',
             weight: 1.5,
             opacity: 0.95,
             zIndexOffset: 1000
-        }).addTo(aStarExplorationLayer);
+        }).addTo(greedyExplorationLayer);
     }
 
     animationClock = setInterval(() => {
         currentFrame++;
 
-        // Greedy (morado): exploración amplia por segmentos
-        if (resultPayload.greedy) {
-            let startIdx = Math.floor(((currentFrame - 1) / totalFrames) * greedyHistory.length);
-            let endIdx = Math.floor((currentFrame / totalFrames) * greedyHistory.length);
-
-            for (let i = startIdx; i < endIdx && i < greedyHistory.length; i++) {
-                let segment = greedyHistory[i];
-                L.polyline(segment, {color: '#c084fc', weight: 1.5, opacity: 0.4}).addTo(greedyExplorationLayer);
-            }
-        }
-
-        // A* (verde): trazo dirigido por heurística
-        if (resultPayload.a_star && animatingAStarPath) {
+        // A*: muchos segmentos → nube morada (no usar trazo acumulado)
+        if (resultPayload.a_star) {
             let startIdx = Math.floor(((currentFrame - 1) / totalFrames) * aStarHistory.length);
             let endIdx = Math.floor((currentFrame / totalFrames) * aStarHistory.length);
 
             for (let i = startIdx; i < endIdx && i < aStarHistory.length; i++) {
-                let segment = aStarHistory[i];
-                if (animatingAStarPath.getLatLngs().length === 0) {
-                    animatingAStarPath.setLatLngs([segment[0], segment[1]]);
-                } else {
-                    animatingAStarPath.addLatLng(segment[1]);
-                }
+                const segment = aStarHistory[i];
+                L.polyline(segment, {color: '#c084fc', weight: 1.5, opacity: 0.4}).addTo(aStarExplorationLayer);
             }
-            animatingAStarPath.bringToFront();
         }
 
-       // CONDICIÓN DE PARADA: Ambos terminan exactamente en el mismo frame
+        // Greedy: historial más corto → trazo verde acumulado
+        if (resultPayload.greedy && animatingGreedyPath) {
+            let startIdx = Math.floor(((currentFrame - 1) / totalFrames) * greedyHistory.length);
+            let endIdx = Math.floor((currentFrame / totalFrames) * greedyHistory.length);
+
+            for (let i = startIdx; i < endIdx && i < greedyHistory.length; i++) {
+                const segment = greedyHistory[i];
+                if (animatingGreedyPath.getLatLngs().length === 0) {
+                    animatingGreedyPath.setLatLngs([segment[0], segment[1]]);
+                } else {
+                    animatingGreedyPath.addLatLng(segment[1]);
+                }
+            }
+            animatingGreedyPath.bringToFront();
+        }
+
         if (currentFrame >= totalFrames) {
             clearInterval(animationClock);
             animationClock = null;
 
-            // ==========================================
-            // ¡MAGIA AQUÍ! Borramos el rastro de exploración
-            // ==========================================
             map.removeLayer(aStarExplorationLayer);
             map.removeLayer(greedyExplorationLayer);
 
-            // Dibujar las soluciones óptimas en trazado grueso final y limpio
-            if (resultPayload.greedy) drawStaticPolyline(resultPayload.greedy.route, '#9333ea');
-            if (resultPayload.a_star) drawStaticPolyline(resultPayload.a_star.route, '#34d399');
+            if (resultPayload.a_star) drawStaticPolyline(resultPayload.a_star.route, '#9333ea');
+            if (resultPayload.greedy) drawStaticPolyline(resultPayload.greedy.route, '#34d399');
 
             updateMetricsDashboard(resultPayload);
-            console.log("[SafeRoute] Animación finalizada en empate técnico. Mapa limpio.");
+            console.log("[SafeRoute] Animación finalizada. Mapa limpio.");
         }
     }, frameIntervalTime);
 }
 
 // --- 9. ACTUALIZACIÓN DEL DASHBOARD DE MÉTRICAS ---
 function updateMetricsDashboard(result) {
-    // Tarjeta morada (metrics-astar) = Greedy | Tarjeta verde (metrics-greedy) = A*
-    if (result.greedy) {
-        document.getElementById('ast-explored').innerText = result.greedy.explored_nodes;
-        document.getElementById('ast-time').innerText = `${(result.greedy.execution_time * 1000).toFixed(2)} ms`;
-        document.getElementById('ast-nodes').innerText = result.greedy.route.length;
-        document.getElementById('ast-cost').innerText = result.greedy.cost.toFixed(2);
-        document.getElementById('ast-dist').innerText = calculateTrueGeodeticDistance(result.greedy.route);
+    if (result.a_star) {
+        document.getElementById('ast-explored').innerText = result.a_star.explored_nodes;
+        document.getElementById('ast-time').innerText = `${(result.a_star.execution_time * 1000).toFixed(2)} ms`;
+        document.getElementById('ast-nodes').innerText = result.a_star.route.length;
+        document.getElementById('ast-cost').innerText = result.a_star.cost.toFixed(2);
+        document.getElementById('ast-dist').innerText = calculateTrueGeodeticDistance(result.a_star.route);
     } else {
         resetMetricBlock('metrics-astar');
     }
 
-    if (result.a_star) {
-        document.getElementById('gre-explored').innerText = result.a_star.explored_nodes;
-        document.getElementById('gre-time').innerText = `${(result.a_star.execution_time * 1000).toFixed(2)} ms`;
-        document.getElementById('gre-nodes').innerText = result.a_star.route.length;
-        document.getElementById('gre-cost').innerText = result.a_star.cost.toFixed(2);
-        document.getElementById('gre-dist').innerText = calculateTrueGeodeticDistance(result.a_star.route);
+    if (result.greedy) {
+        document.getElementById('gre-explored').innerText = result.greedy.explored_nodes;
+        document.getElementById('gre-time').innerText = `${(result.greedy.execution_time * 1000).toFixed(2)} ms`;
+        document.getElementById('gre-nodes').innerText = result.greedy.route.length;
+        document.getElementById('gre-cost').innerText = result.greedy.cost.toFixed(2);
+        document.getElementById('gre-dist').innerText = calculateTrueGeodeticDistance(result.greedy.route);
     } else {
         resetMetricBlock('metrics-greedy');
     }
