@@ -1,7 +1,7 @@
 // Configuración del endpoint de FastAPI (dinámico para producción o local)
 const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
     ? 'http://127.0.0.1:8000/api'
-    : 'https://saferoutemedellin-production-e0d2.up.railway.app';
+    : 'https://saferoutemedellin-production-e0d2.up.railway.app/api';
 
 
 // --- SNAP AL NODO MÁS CERCANO DEL GRAFO ---
