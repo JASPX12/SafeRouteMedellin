@@ -32,6 +32,7 @@ ehthumbs.db
 
 # --- Seguridad y Variables de Entorno ---
 .env
+.env.example
 .env.local
 .env.*.local
 secrets.json
