@@ -1,6 +1,16 @@
 import os
+import math
 import pandas as pd
 from scipy.spatial import KDTree
+
+
+def _kdtree_distance_to_meters(kdtree_distance: float) -> float:
+    """
+    Convierte la distancia euclidiana en grados (resultado del KDTree)
+    a metros usando una aproximación lineal válida para zonas urbanas.
+    1 grado ≈ 111_320 metros en la latitud de Medellín.
+    """
+    return round(kdtree_distance * 111_320, 0)
 
 
 class EmergencyLocator:
@@ -29,13 +39,14 @@ class EmergencyLocator:
 
             cai_coords = []
             for _, row in df_cai.iterrows():
-                # Forzamos los tipos nativos float() para evitar el colapso del JSON
                 cai_coords.append((float(row['longitud']), float(row['latitud'])))
                 self.cai_data.append({
-                    "name": str(row.get('cai', 'CAI Sin Nombre')),
+                    "name": str(row.get('nombre', 'CAI Sin Nombre')),
+                    "type": str(row.get('tipo', 'CAI')),
                     "address": str(row.get('direccion', 'Dirección no disponible')),
-                    "lat": float(row['latitud']),  # <-- ¡La magia está aquí!
-                    "lon": float(row['longitud'])  # <-- ¡Y aquí!
+                    "phone": str(row.get('telefono', 'No disponible')),
+                    "lat": float(row['latitud']),
+                    "lon": float(row['longitud']),
                 })
 
             if cai_coords:
@@ -56,27 +67,35 @@ class EmergencyLocator:
                 # Forzamos los tipos nativos float() y str()
                 hosp_coords.append((float(row['longitud']), float(row['latitud'])))
                 self.hospital_data.append({
-                    "name": str(row.get('nombre', 'Centro Médico Sin Nombre')),
-                    "type": str(row['tipo']),
+                    "name": str(row.get('nombre', '') or 'Centro Médico Sin Nombre'),
+                    "type": str(row.get('tipo', 'hospital')),
+                    "address": str(row.get('ciudad', '') or 'Medellín y Área Metropolitana'),
+                    "phone": str(row.get('telefono', '') or 'No disponible'),
                     "lat": float(row['latitud']),
-                    "lon": float(row['longitud'])
+                    "lon": float(row['longitud']),
                 })
 
             if hosp_coords:
                 self.hospital_tree = KDTree(hosp_coords)
                 print(f"[EmergencyLocator] {len(hosp_coords)} Hospitales/Clínicas indexados.")
+
+    def _with_distance(self, record: dict, kdtree_distance: float) -> dict:
+        result = dict(record)
+        meters = _kdtree_distance_to_meters(kdtree_distance)
+        result["distance_m"] = meters
+        result["distance"] = f"{meters:,.0f} m".replace(",", ".")
+        return result
+
     def get_nearest_cai(self, lon, lat):
         """Devuelve el CAI más cercano a las coordenadas dadas."""
         if not self.cai_tree:
             return None
-        # distance: qué tan lejos está en línea recta
-        # index: en qué posición de la lista self.cai_data está guardado
         distance, index = self.cai_tree.query((lon, lat))
-        return self.cai_data[index]
+        return self._with_distance(self.cai_data[index], distance)
 
     def get_nearest_hospital(self, lon, lat):
         """Devuelve el Hospital más cercano a las coordenadas dadas."""
         if not self.hospital_tree:
             return None
         distance, index = self.hospital_tree.query((lon, lat))
-        return self.hospital_data[index]
+        return self._with_distance(self.hospital_data[index], distance)

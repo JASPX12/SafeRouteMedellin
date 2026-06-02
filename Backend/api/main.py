@@ -1,6 +1,12 @@
 import os
 import time
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde .env (credenciales SMTP y Twilio)
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
+
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -60,6 +66,22 @@ def find_nearest_node(lat: float, lon: float) -> Any:
     return NODES_LIST[index]
 
 
+@app.get("/api/nearest-node")
+def get_nearest_node(lat: float, lon: float) -> Dict[str, float]:
+    """
+    Recibe unas coordenadas crudas (clic del usuario en el mapa)
+    y devuelve la coordenada del nodo más cercano en el grafo vial.
+    Esto evita errores de enrutamiento por puntos fuera de la red.
+    """
+    node = find_nearest_node(lat, lon)
+    snapped_lon, snapped_lat = node[0], node[1]
+    return {
+        "lat": snapped_lat,
+        "lon": snapped_lon
+    }
+
+
+
 # Definimos que el origen y destino son exactamente parejas de coordenadas [lat, lon]
 class RouteRequest(BaseModel):
     origen: Tuple[float, float]
@@ -75,6 +97,16 @@ class EmergencyRequest(BaseModel):
     alpha: float
     beta: float
     mode: str = "both"
+
+
+class PanicAlertRequest(BaseModel):
+    latitud: float
+    longitud: float
+    contacto_nombre: str
+    contacto_email: str
+    contacto_telefono: str
+    mensaje_personalizado: str = None
+
 
 
 @app.get("/api/heatmap")
@@ -175,3 +207,19 @@ def calculate_emergency_route(request: EmergencyRequest) -> Dict[str, Any]:
     response_data["emergency_info"] = nearest_emergency
 
     return response_data
+
+
+@app.post("/api/send-panic-alert")
+def send_panic_alert(request: PanicAlertRequest) -> Dict[str, Any]:
+    from utils.notifier import send_emergency_alert
+    
+    result = send_emergency_alert(
+        lat=request.latitud,
+        lon=request.longitud,
+        contact_name=request.contacto_nombre,
+        contact_email=request.contacto_email,
+        contact_phone=request.contacto_telefono,
+        user_message=request.mensaje_personalizado
+    )
+    
+    return result

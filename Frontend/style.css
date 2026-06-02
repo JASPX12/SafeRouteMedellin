@@ -160,13 +160,61 @@ button {
     font-weight: 600;
 }
 
-#balance-slider {
-    width: 100%;
-    margin: 10px 0;
+.slider-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 8px;
 }
 
-#balance-slider:disabled {
-    cursor: not-allowed;
+.slider-label:first-of-type {
+    margin-top: 0;
+}
+
+#alpha-slider,
+#beta-slider {
+    width: 100%;
+    margin: 6px 0;
+}
+
+#alpha-slider {
+    accent-color: var(--accent-color);
+}
+
+#beta-slider {
+    accent-color: var(--gre-color);
+}
+
+#anim-speed-slider {
+    width: 100%;
+    margin: 10px 0;
+    accent-color: #f59e0b;
+}
+
+.route-preset-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.btn-route-preset {
+    padding: 8px 6px;
+    font-size: 11px;
+    background-color: var(--bg-main);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    border-radius: 6px;
+}
+
+.btn-route-preset:hover {
+    border-color: var(--accent-color);
+}
+
+.btn-route-preset.active {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
 }
 
 .slider-values {
@@ -221,6 +269,59 @@ button {
 .btn-emergency:hover {
     background-color: var(--emergency-color);
     color: white;
+}
+
+.emergency-info-panel {
+    margin-top: 12px;
+    padding: 10px;
+    background-color: rgba(239, 68, 68, 0.08);
+    border: 1px solid var(--emergency-color);
+    border-radius: 8px;
+    animation: emergencyFadeIn 0.3s ease;
+}
+
+.emergency-info-panel[hidden] {
+    display: none !important;
+}
+
+.emergency-info-panel h4 {
+    font-size: 12px;
+    color: var(--emergency-color);
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 4px;
+}
+
+.emergency-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.emergency-info-list li {
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+.emergency-info-list .info-label {
+    display: inline-block;
+    min-width: 62px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.emergency-info-list strong {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+@keyframes emergencyFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* MAP RECTANGLE */
@@ -314,3 +415,445 @@ button {
 .app-container.metrics-hidden .metrics-panel {
     display: none; /* Desaparece el contenido para evitar desbordamientos */
 }
+
+/* =========================================
+   NUEVOS ESTILOS: BOTÓN DE PÁNICO Y MOCKUPS
+   ========================================= */
+
+/* Animación pulsante continua */
+@keyframes panic-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        transform: scale(1);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+        transform: scale(1.02);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        transform: scale(1);
+    }
+}
+
+.btn-panic {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--emergency-color), #b91c1c);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    animation: panic-pulse 2s infinite;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+}
+
+.btn-panic:hover {
+    background: linear-gradient(135deg, var(--emergency-hover), #991b1b);
+    transform: translateY(-1px);
+}
+
+.btn-panic:active {
+    transform: scale(0.98);
+}
+
+/* Formulario de contactos */
+.emergency-contacts-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.emergency-contacts-group .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.emergency-contacts-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.emergency-contacts-group input {
+    padding: 7px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    width: 100%;
+}
+
+.emergency-contacts-group input:focus {
+    outline: none;
+    border-color: var(--emergency-color);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+/* OVERLAY DE CUENTA REGRESIVA */
+.countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    color: white;
+}
+
+.countdown-box {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.countdown-circle-container {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 6px solid rgba(239, 68, 68, 0.2);
+    border-top: 6px solid var(--emergency-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+}
+
+.countdown-number {
+    font-size: 72px;
+    font-weight: 800;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+}
+
+.countdown-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #f8fafc;
+    font-family: 'Poppins', sans-serif;
+}
+
+.countdown-subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 35px;
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+.btn-cancel-alert {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 12px 35px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-cancel-alert:hover {
+    background: white;
+    color: #0f172a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 255, 255, 0.4);
+}
+
+/* OVERLAY DE MAQUETA DE SIMULACIÓN */
+.mockup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.mockup-container {
+    background-color: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    max-width: 960px;
+    width: 100%;
+    max-height: 90vh;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.mockup-header {
+    padding: 15px 25px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--bg-card);
+}
+
+.mockup-header h2 {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--emergency-color);
+    flex: 1;
+    min-width: 200px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mockup-status-banner {
+    width: 100%;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: var(--bg-main);
+    border: 1px solid var(--border-color);
+}
+
+.mockup-status-banner.status-success {
+    color: #166534;
+    background-color: #f0fdf4;
+    border-color: #86efac;
+}
+
+.mockup-status-banner.status-warning {
+    color: #92400e;
+    background-color: #fffbeb;
+    border-color: #fcd34d;
+}
+
+body.dark-mode .mockup-status-banner.status-success {
+    color: #86efac;
+    background-color: rgba(22, 101, 52, 0.2);
+    border-color: #166534;
+}
+
+body.dark-mode .mockup-status-banner.status-warning {
+    color: #fcd34d;
+    background-color: rgba(146, 64, 14, 0.2);
+    border-color: #92400e;
+}
+
+.mockup-channel-label {
+    font-size: 11px;
+    margin-bottom: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.btn-close-mockup {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.mockup-content {
+    padding: 25px;
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 25px;
+    overflow-y: auto;
+}
+
+@media (max-width: 820px) {
+    .mockup-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* SMARTPHONE MOCKUP */
+.phone-frame {
+    border: 10px solid #1e293b;
+    border-radius: 32px;
+    height: 480px;
+    background-color: #f3f4f6;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.phone-screen {
+    flex: 1;
+    padding: 20px 10px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #efeae2; /* Color WhatsApp chat */
+}
+
+.phone-header {
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #4b5563;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    margin-bottom: 15px;
+}
+
+.sms-bubble {
+    background-color: #ffffff; /* Burbuja blanca de recibido */
+    color: #1f2937;
+    padding: 10px 12px;
+    border-radius: 12px 12px 12px 2px;
+    font-size: 12px;
+    line-height: 1.45;
+    max-width: 88%;
+    align-self: flex-start;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.sms-bubble a {
+    color: #2563eb;
+    text-decoration: underline;
+    word-break: break-all;
+    font-weight: 500;
+}
+
+.sms-time {
+    display: block;
+    font-size: 9px;
+    color: #9ca3af;
+    text-align: right;
+    margin-top: 4px;
+}
+
+/* CORREO BROWSER MOCKUP */
+.email-browser-frame {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    height: 480px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #ffffff;
+}
+
+.email-browser-header {
+    background-color: #f1f5f9;
+    padding: 8px 15px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.browser-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+.browser-dot-red { background-color: #ef4444; }
+.browser-dot-yellow { background-color: #f59e0b; }
+.browser-dot-green { background-color: #10b981; }
+
+.browser-address {
+    flex: 1;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 2px 12px;
+    font-size: 11px;
+    color: #64748b;
+    margin-left: 12px;
+    font-family: monospace;
+}
+
+.email-browser-content {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #f4f6f9;
+}
+
+/* Asegurar que el HTML inyectado quepa de manera adaptativa */
+.email-browser-content iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #f4f6f9;
+}
+
+/* =========================================
+   NUEVOS ESTILOS: BOTÓN DE PÁNICO FLOTANTE (FAB)
+   ========================================= */
+.floating-panic-button {
+    position: fixed;
+    bottom: 180px; /* Posicionado por encima del panel de métricas inferior (160px de alto) */
+    right: 25px;
+    width: 65px;
+    height: 65px;
+    background: linear-gradient(135deg, var(--emergency-color), #b91c1c);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+    z-index: 2000; /* Por encima de los controles de Leaflet (1000) pero debajo de overlays (99999) */
+    animation: panic-pulse 2s infinite;
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.floating-panic-button:hover {
+    background: linear-gradient(135deg, var(--emergency-hover), #991b1b);
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 10px 28px rgba(239, 68, 68, 0.55);
+}
+
+.floating-panic-button:active {
+    transform: scale(0.95);
+}
+
+/* Transición suave cuando se ocultan las métricas */
+.app-container.metrics-hidden .floating-panic-button {
+    bottom: 25px;
+}
+

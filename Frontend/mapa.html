@@ -76,7 +76,7 @@ Mostrar Mapa de Calor (Riesgo Real)
 
 <option value="">-- Barrio --</option>
 
-<option value="6.2083,-75.5675">El Poblado</option>
+<option value="6.2083,-75.5675" selected>El Poblado</option>
 
 <option value="6.2442,-75.5912">Laureles</option>
 
@@ -89,8 +89,6 @@ Mostrar Mapa de Calor (Riesgo Real)
 <option value="6.2312,-75.6104">Belén</option>
 
 <option value="6.3375,-75.5521">Bello</option>
-
-<option value="6.1738,-75.6041">Envigado</option>
 
 </select>
 
@@ -120,7 +118,7 @@ Mostrar Mapa de Calor (Riesgo Real)
 
 <option value="6.2442,-75.5912">Laureles</option>
 
-<option value="6.2518,-75.5636">Centro / Candelaria</option>
+<option value="6.2518,-75.5636" selected>Centro / Candelaria</option>
 
 <option value="6.2914,-75.5586">Aranjuez</option>
 
@@ -129,8 +127,6 @@ Mostrar Mapa de Calor (Riesgo Real)
 <option value="6.2312,-75.6104">Belén</option>
 
 <option value="6.3375,-75.5521">Bello</option>
-
-<option value="6.1738,-75.6041">Envigado</option>
 
 </select>
 
@@ -169,24 +165,63 @@ Mostrar Mapa de Calor (Riesgo Real)
 </div>
 
 
-
 <div class="control-group">
 
 <div class="slider-header">
 
-<span>⚡ Rapidez (Alpha)</span>
+<span>🐢 Muy Lenta</span>
 
-<span>🛡️ Seguridad (Beta)</span>
+<span>⚡ Velocidad Animación</span>
+
+<span>🚀 Turbo</span>
 
 </div>
 
-<input type="range" id="balance-slider" min="0" max="1" step="0.1" value="0.5">
+<input type="range" id="anim-speed-slider" min="1" max="8" step="1" value="5">
+
+<div class="slider-values" style="justify-content: center;">
+
+<span id="anim-speed-label">Velocidad: Normal</span>
+
+</div>
+
+</div>
+
+
+
+<div class="control-group">
+
+<h3>Balance de Ruta</h3>
+
+<label class="slider-label">⚡ Rapidez (Alpha)</label>
+
+<input type="range" id="alpha-slider" min="0" max="1" step="0.1" value="0.5">
 
 <div class="slider-values">
 
 <span id="alpha-val">Alpha: 0.5</span>
 
+</div>
+
+<label class="slider-label">🛡️ Seguridad (Beta)</label>
+
+<input type="range" id="beta-slider" min="0" max="1" step="0.1" value="0.5">
+
+<div class="slider-values">
+
 <span id="beta-val">Beta: 0.5</span>
+
+</div>
+
+<div class="route-preset-row">
+
+<button type="button" class="btn-route-preset" data-preset="safe">🛡️ Más Segura</button>
+
+<button type="button" class="btn-route-preset" data-preset="fast">⚡ Más Rápida</button>
+
+<button type="button" class="btn-route-preset active" data-preset="balance">⚖️ Balance</button>
+
+<button type="button" class="btn-route-preset" data-preset="custom">🎛️ Personalizada</button>
 
 </div>
 
@@ -216,13 +251,83 @@ Mostrar Mapa de Calor (Riesgo Real)
 
 </div>
 
+<div id="emergency-info-panel" class="emergency-info-panel" hidden>
+
+<h4>📍 Punto de Emergencia Encontrado</h4>
+
+<ul class="emergency-info-list">
+
+<li><span class="info-label">Nombre:</span> <strong id="emergency-info-name">-</strong></li>
+
+<li><span class="info-label">Tipo:</span> <strong id="emergency-info-type">-</strong></li>
+
+<li><span class="info-label">Dirección:</span> <strong id="emergency-info-address">-</strong></li>
+
+<li><span class="info-label">Teléfono:</span> <strong id="emergency-info-phone">-</strong></li>
+
+<li><span class="info-label">Distancia:</span> <strong id="emergency-info-distance">-</strong></li>
+
+</ul>
+
+</div>
+
+</div>
+
+
+<div class="control-group emergency-section" style="margin-top: 10px;">
+
+<h3>🚨 Alerta de Auxilio</h3>
+
+<p class="emergency-desc">Configura un contacto de confianza para enviar una alerta de pánico con tu ubicación desde el punto de partida.</p>
+
+
+<div class="emergency-contacts-group">
+
+<div class="field">
+
+<label for="contact-name">Nombre de Contacto:</label>
+
+<input type="text" id="contact-name" placeholder="Ej: Mamá, Pareja, Amigo">
+
+</div>
+
+<div class="field">
+
+<label for="contact-email">Correo Electrónico:</label>
+
+<input type="text" id="contact-email" placeholder="Ej: contacto@seguro.com">
+
+</div>
+
+<div class="field">
+
+<label for="contact-phone">Teléfono Móvil (SMS):</label>
+
+<input type="text" id="contact-phone" placeholder="Ej: +573001234567">
+
+</div>
+
+</div>
+
+
+<button id="btn-panic-trigger" class="btn-panic">
+    🚨 ACTIVAR BOTÓN DE PÁNICO
+</button>
+
 </div>
 
 </aside>
 
 
 
+
 <main id="map" class="map-area"></main>
+
+
+<button id="btn-panic-floating" class="floating-panic-button" title="Activar Alerta de Pánico (Botón de Auxilio)">
+    🚨
+</button>
+
 
 
 
@@ -280,15 +385,65 @@ Mostrar Mapa de Calor (Riesgo Real)
 
 </div>
 
-</footer>
-
-
-
 </div>
 
 
+<!-- OVERLAY DE CUENTA REGRESIVA DE AUXILIO -->
+<div id="countdown-modal" class="countdown-overlay">
+    <div class="countdown-box">
+        <div class="countdown-circle-container">
+            <span id="countdown-number" class="countdown-number">3</span>
+        </div>
+        <h2 class="countdown-title">ENVIANDO ALERTA DE AUXILIO</h2>
+        <p class="countdown-subtitle font-secondary">Se transmitirá tu punto de origen y coordenadas a tu contacto de emergencia en segundos...</p>
+        <button id="btn-cancel-panic" class="btn-cancel-alert">CANCELAR ALERTA</button>
+    </div>
+</div>
+
+<!-- OVERLAY DE CONFIRMACIÓN DE ALERTA ENVIADA -->
+<div id="mockup-modal" class="mockup-overlay">
+    <div class="mockup-container">
+        <div class="mockup-header">
+            <h2 id="mockup-modal-title">🚨 Alerta de Pánico Enviada</h2>
+            <p id="mockup-status-banner" class="mockup-status-banner"></p>
+            <button id="btn-close-mockup" class="btn-close-mockup">&times;</button>
+        </div>
+        <div class="mockup-content">
+            <!-- Columna Celular (SMS) -->
+            <div id="mockup-sms-column">
+                <h3 id="mockup-sms-label" class="mockup-channel-label"></h3>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="phone-header">SafeRoute Alerta SMS</div>
+                        <div class="sms-bubble">
+                            <span id="mockup-sms-text">Cargando SMS...</span>
+                            <span class="sms-time" id="mockup-sms-time">16:10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Columna Navegador (Email HTML) -->
+            <div id="mockup-email-column">
+                <h3 id="mockup-email-label" class="mockup-channel-label"></h3>
+                <div class="email-browser-frame">
+                    <div class="email-browser-header">
+                        <span class="browser-dot browser-dot-red"></span>
+                        <span class="browser-dot browser-dot-yellow"></span>
+                        <span class="browser-dot browser-dot-green"></span>
+                        <span class="browser-address">https://mail.saferoutemedellin.com/inbox</span>
+                    </div>
+                    <div class="email-browser-content">
+                        <iframe id="mockup-email-iframe"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
