@@ -4,3 +4,4 @@ pandas
 scipy
 networkx
 osmnx
+python-dotenv
