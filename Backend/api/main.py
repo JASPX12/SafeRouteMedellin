@@ -3,9 +3,9 @@ import time
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
-# Cargar variables de entorno desde .env (credenciales SMTP y Twilio)
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
+load_dotenv()
 
+API_KEY = os.getenv("API_KEY")
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -250,3 +250,4 @@ def send_panic_alert(request: PanicAlertRequest) -> Dict[str, Any]:
     )
     
     return result
+

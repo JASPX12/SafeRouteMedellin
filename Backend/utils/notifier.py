@@ -1,11 +1,10 @@
 import os
-import smtplib
 import urllib.request
 import urllib.parse
 import json
 import base64
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
+import resend
 
 def send_emergency_alert(
     lat: float,
@@ -163,14 +162,13 @@ def send_emergency_alert(
     </html>
     """
 
-    # 3. VERIFICAR CREDENCIALES DE ENVÍO REAL
-    # Variables SMTP
-    smtp_server = os.getenv("SMTP_SERVER")
-    smtp_port = os.getenv("SMTP_PORT")
-    smtp_user = os.getenv("SMTP_USERNAME")
-    smtp_password = os.getenv("SMTP_PASSWORD")
-    smtp_sender = os.getenv("SMTP_SENDER_EMAIL", "alertas@saferoutemedellin.com")
-
+    # 3. CONFIGURACIÓN RESEND
+    resend_api_key = os.getenv("RESEND_API_KEY")
+    print("API KEY:", resend_api_key)
+    resend_sender = os.getenv(
+        "RESEND_FROM_EMAIL",
+        "onboarding@resend.dev"
+    )
     # Variables Twilio
     twilio_sid = os.getenv("TWILIO_ACCOUNT_SID")
     twilio_token = os.getenv("TWILIO_AUTH_TOKEN")
@@ -181,32 +179,37 @@ def send_emergency_alert(
     email_error = None
     sms_error = None
 
-    # 4. ENVÍO DE EMAIL REAL
-    if smtp_server and smtp_user and smtp_password:
+    # 4. ENVÍO DE EMAIL REAL (RESEND SDK)
+    if resend_api_key:
         try:
-            port = int(smtp_port) if smtp_port else 587
-            msg = MIMEMultipart()
-            msg['From'] = smtp_sender
-            msg['To'] = contact_email
-            msg['Subject'] = "🚨 ALERTA DE EMERGENCIA - SafeRouteMedellín"
-            
-            msg.attach(MIMEText(email_html, 'html'))
-            
-            # Conexión SMTP estándar
-            server = smtplib.SMTP(smtp_server, port)
-            server.starttls()
-            server.login(smtp_user, smtp_password)
-            server.sendmail(smtp_sender, contact_email, msg.as_string())
-            server.quit()
-            
+            resend.api_key = resend_api_key
+
+            params = {
+                "from": f"SafeRoute Medellín <{resend_sender}>",
+                "to": [contact_email],
+                "subject": "🚨 ALERTA DE EMERGENCIA - SafeRouteMedellín",
+                "html": email_html,
+            }
+
+            response = resend.Emails.send(params)
+
             email_status = "sent"
-            print(f"[Notifier] Email real enviado con éxito a {contact_email}")
+            print(
+                f"[Notifier] Email real enviado con éxito a {contact_email}"
+            )
+            print(response)
+
         except Exception as e:
             email_status = "failed"
             email_error = str(e)
-            print(f"[Notifier] Error enviando email real: {e}")
+            print(
+                f"[Notifier] Error enviando email real: {e}"
+            )
+
     else:
-        print(f"[Notifier - SIMULACIÓN] Email para {contact_email} registrado en memoria.")
+        print(
+            f"[Notifier - SIMULACIÓN] Email para {contact_email} registrado en memoria."
+        )
 
     # 5. ENVÍO DE SMS REAL VIA TWILIO (Librería estándar urllib)
     if twilio_sid and twilio_token and twilio_from:

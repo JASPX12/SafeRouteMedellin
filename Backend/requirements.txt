@@ -4,4 +4,6 @@ pandas
 scipy
 networkx
 osmnx
-python-dotenv
+python-dotenv
+requests
+resend
