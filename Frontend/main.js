@@ -52,10 +52,13 @@ const betaLabel = document.getElementById('beta-val');
 const routePresetButtons = document.querySelectorAll('.btn-route-preset');
 
 const ROUTE_PRESETS = {
-    safe: { alpha: 0.2, beta: 0.8 },
-    fast: { alpha: 0.8, beta: 0.2 },
+    safe: { alpha: 0.1, beta: 0.9 },
+    fast: { alpha: 0.9, beta: 0.1 },
     balance: { alpha: 0.5, beta: 0.5 },
 };
+
+const ALPHA_BETA_MIN = 0.1;
+const ALPHA_BETA_MAX = 0.9;
 
 let activeRoutePreset = 'balance';
 
@@ -78,10 +81,9 @@ function setRoutePreset(presetName, updateSliders = true) {
 }
 
 function getAlphaBetaValues() {
-    return {
-        alpha: parseFloat(alphaSlider.value),
-        beta: parseFloat(betaSlider.value),
-    };
+    const alpha = Math.min(ALPHA_BETA_MAX, Math.max(ALPHA_BETA_MIN, parseFloat(alphaSlider.value)));
+    const beta = Math.min(ALPHA_BETA_MAX, Math.max(ALPHA_BETA_MIN, parseFloat(betaSlider.value)));
+    return { alpha, beta };
 }
 
 alphaSlider?.addEventListener('input', () => {
